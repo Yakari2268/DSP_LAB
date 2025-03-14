@@ -1,0 +1,43 @@
+hn = [1,-1,0.9];
+
+a = [1,-1,0.9];
+b = 1;
+[h,w] = freqz(a,b,'whole');
+fs = 1000;
+
+%plotting freq response of the filter
+figure(2);
+plot((w*fs)/2*pi,20*log10(abs(h)))
+
+%plotting impulse response in the time domain
+n = 1:length(hn);
+yn = filter(a,b,hn);
+figure(1)
+stem(n,yn);
+
+freq = [10,100,1000,400,1800];
+
+fs = 8000;
+ts = 1/fs;
+t = ts:ts:1;
+n = 1:500;
+
+for i = 1:length(freq)
+
+    xn = cos(2*pi*freq(i)*n*ts);
+    %adding noise
+    xn = xn+0.25*(-1+2*rand(size(xn)));
+    
+    xn = overlapsave(xn,hn,200);
+    n = 1:length(xn);
+
+    figure(1)
+    subplot(5,2,2*i-1)
+    plot(n,xn);
+    
+    yn = filter(a,b,xn);
+    figure(1)
+    subplot(5,2,2*i)
+    plot(n,yn);
+
+end
