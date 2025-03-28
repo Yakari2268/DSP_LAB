@@ -1,37 +1,36 @@
-hn = [1/5,1/5,1/5,1/5,1/5];
-a = [1,1,1,1,1];
-b = 5;
-[h,w] = freqz(a,b,'whole');
+wp = 0.2*pi;
+ws = 0.35*pi;
+kp = -1;
+ks = -15;
 
-%plotting freq response of the filter
-figure(2);
-plot((w*fs)/2*pi,20*log10(abs(h)))
+[n,wc] = buttord(wp,ws,kp,ks,'s');
+[bn,an] = butter(n,1,"low",'s');
+[bs,as] = butter(n,wc,"low",'s');
+
+w = 0:0.01:pi;
+h = freqs(bs,as,w);
+plot(w,mag2db(abs(h)));
 
 
+[bz,az] = impinvar(bs,as);
 
-freq = [10,100,1000,5000,10000];
 
-fs = 8000;
-ts = 1/fs;
-
-t = ts:ts:1;
-n = 1:500;
-
-for i = 1:length(freq)
-
-    xn = cos(2*pi*freq(i)*n*ts);
-    %adding noise
-    xn = xn+0.25*(-1+2*rand(size(xn)));
+f = [0.1 0.2 0.3 0.4 0.5]*pi;
+t = 0:0.01:2;
+for i = 1:length(f)
+    %input sin wave 
+    
+    x1t = sin(2*pi*f(i)*t);
     
     figure(1)
-    subplot(5,2,2*i-1)
-    plot(n,xn);
+    subplot(length(f),2,2*i-1)
+    stem(t,x1t);
     
-    yn = filter(a,b,xn);
+    y1t = filter(bn,an,x1t);
+    
     figure(1)
-    subplot(5,2,2*i)
-    plot(n,yn);
-
+    subplot(length(f),2,2*i)
+    plot(0:length(y1t)-1,y1t);
 end
 
 

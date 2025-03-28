@@ -1,43 +1,36 @@
-hn = [1,-1,0.9];
+wp = 0.2*pi;
+ws = 0.35*pi;
+kp = -1;
+ks = -15;
 
-a = [1,-1,0.9];
-b = 1;
-[h,w] = freqz(a,b,'whole');
-fs = 1000;
+[n,wc] = cheb1ord(wp,ws,kp,ks,'s');
+[bn,an] = cheby1(n,abs(kp),1,'low','s');
+[bs,as] = cheby1(n,abs(kp),wc,"low",'s');
 
-%plotting freq response of the filter
-figure(2);
-plot((w*fs)/2*pi,20*log10(abs(h)))
+w = 0:0.01:pi;
+h = freqs(bs,as,w);
+figure(2)
+plot(w,mag2db(abs(h)));
 
-%plotting impulse response in the time domain
-n = 1:length(hn);
-yn = filter(a,b,hn);
-figure(1)
-stem(n,yn);
 
-freq = [100,500,1000,1500,1800];
+[bz,az] = impinvar(bs,as);
 
-fs = 8000;
-ts = 1/fs;
-t = ts:ts:1;
-n = 1:500;
-
-for i = 1:length(freq)
-
-    xn = cos(2*pi*freq(i)*n*ts);
-    %adding noise
-    xn = xn+0.25*(-1+2*rand(size(xn)));
+f = [0.1 0.2 0.3 0.4 0.5]*pi;
+t = 0:0.01:2;
+for i = 1:length(f)
+    %input sin wave 
     
-    xn = overlapsave(xn,hn,200);
-    n = 1:length(xn);
-
-    figure(1)
-    subplot(5,2,2*i-1)
-    plot(n,xn);
+    x1t = sin(2*pi*f(i)*t);
     
-    yn = filter(a,b,xn);
     figure(1)
-    subplot(5,2,2*i)
-    plot(n,yn);
-
+    subplot(length(f),2,2*i-1)
+    stem(t,x1t);
+    
+    y1t = filter(bz,az,x1t);
+    
+    figure(1)
+    subplot(length(f),2,2*i)
+    stem(0:length(y1t)-1,y1t);
 end
+
+
